@@ -3,8 +3,6 @@ use mowl::error::*;
 
 #[macro_use]
 extern crate log;
-use log::LogLevelFilter;
-
 extern crate term;
 
 use std::io;

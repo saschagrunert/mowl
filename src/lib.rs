@@ -77,7 +77,7 @@ impl Log for Logger {
 impl Logger {
     fn log_result(&self, record: &LogRecord) -> LogResult<()> {
         // We have to create a new terminal on each log because Send is not fulfilled
-        let mut t = stderr().ok_or(bail(ErrorType::Internal, &"Could not create terminal."))?;
+        let mut t = stderr().ok_or_else(|| bail(ErrorType::Internal, &"Could not create terminal."))?;
         t.fg(BRIGHT_BLUE)?;
         write!(t, "[{}] ", record.location().module_path())?;
         match record.level() {
