@@ -9,6 +9,7 @@
 //! warn!("Warning");
 //! # }
 //! ```
+#![deny(missing_docs)]
 extern crate log;
 extern crate term;
 
