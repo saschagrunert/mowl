@@ -1,14 +1,14 @@
 //! # Minimal logger with color support
-///
-/// ```
-/// # #[macro_use] extern crate log;
-/// # extern crate mowl;
-/// #
-/// # fn main() {
-/// mowl::init().unwrap();
-/// warn!("Warning");
-/// # }
-/// ```
+//!
+//! ```
+//! # #[macro_use] extern crate log;
+//! # extern crate mowl;
+//! #
+//! # fn main() {
+//! mowl::init().unwrap();
+//! warn!("Warning");
+//! # }
+//! ```
 extern crate log;
 extern crate term;
 
