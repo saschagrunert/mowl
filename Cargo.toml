@@ -1,6 +1,6 @@
 [package]
 name = "mowl"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["Sascha Grunert <mail@saschagrunert.de>"]
 license = "MIT"
 readme = "README.md"
@@ -9,6 +9,12 @@ repository = "https://github.com/saschagrunert/mowl"
 homepage = "https://github.com/saschagrunert/mowl"
 documentation = "https://docs.rs/mowl"
 description = "Simple logging with coloring support"
+categories = ["command-line-interface"]
+license-file = "LICENSE"
+
+[badges]
+travis-ci = { repository = "saschagrunert/mowl", branch = "master" }
+appveyor = { repository = "saschagrunert/mowl", branch = "master", service = "github" }
 
 [dependencies]
 log = "0"
