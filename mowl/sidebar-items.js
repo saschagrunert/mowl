@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["init","Initializes the global logger with `max_log_level` set to `LogLevel::Trace`."],["init_with_level","Initializes the global logger with a specific `max_log_level`."]],"mod":[["error","Basic error handling mechanisms"]],"struct":[["Logger","The logging structure"]]});
