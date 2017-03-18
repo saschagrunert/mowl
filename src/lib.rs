@@ -13,10 +13,13 @@
 extern crate log;
 extern crate term;
 
-pub mod error;
-use error::{LogResult, ErrorType, bail};
+#[macro_use]
+extern crate error_chain;
 
-use log::{Log, LogRecord, LogLevel, LogMetadata, SetLoggerError};
+pub mod error;
+use error::*;
+
+use log::{Log, LogRecord, LogLevel, LogMetadata};
 use term::stderr;
 use term::color::*;
 
@@ -33,11 +36,12 @@ use term::color::*;
 /// info!("A info message");
 /// # }
 /// ```
-pub fn init_with_level(log_level: LogLevel) -> Result<(), SetLoggerError> {
+pub fn init_with_level(log_level: LogLevel) -> Result<()> {
     log::set_logger(|max_log_level| {
         max_log_level.set(log_level.to_log_level_filter());
         Box::new(Logger { level: log_level })
-    })
+    })?;
+    Ok(())
 }
 
 /// Initializes the global logger with `max_log_level` set to `LogLevel::Trace`.
@@ -52,7 +56,7 @@ pub fn init_with_level(log_level: LogLevel) -> Result<(), SetLoggerError> {
 /// warn!("Warning");
 /// # }
 /// ```
-pub fn init() -> Result<(), SetLoggerError> {
+pub fn init() -> Result<()> {
     init_with_level(LogLevel::Trace)
 }
 
@@ -69,16 +73,16 @@ impl Log for Logger {
     fn log(&self, record: &LogRecord) {
         if self.enabled(record.metadata()) {
             if let Err(e) = self.log_result(record) {
-                println!("Logging failed: {}", e.description);
+                println!("Logging failed: {}", e);
             }
         }
     }
 }
 
 impl Logger {
-    fn log_result(&self, record: &LogRecord) -> LogResult<()> {
+    fn log_result(&self, record: &LogRecord) -> Result<()> {
         // We have to create a new terminal on each log because Send is not fulfilled
-        let mut t = stderr().ok_or_else(|| bail(ErrorType::Internal, &"Could not create terminal."))?;
+        let mut t = stderr().ok_or_else(|| "Could not create terminal.")?;
         t.fg(BRIGHT_BLUE)?;
         write!(t, "[{}] ", record.location().module_path())?;
         match record.level() {
@@ -88,7 +92,7 @@ impl Logger {
             LogLevel::Debug => t.fg(BRIGHT_CYAN)?,
             LogLevel::Trace => t.fg(BRIGHT_WHITE)?,
         };
-        write!(t, "[{:<5}] ", record.level())?;
+        write!(t, "[{}] ", record.level())?;
         t.reset()?;
         writeln!(t, "{}", record.args())?;
         Ok(())

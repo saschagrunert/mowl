@@ -1,6 +1,6 @@
 [package]
 name = "mowl"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["Sascha Grunert <mail@saschagrunert.de>"]
 license = "MIT"
 readme = "README.md"
@@ -17,5 +17,6 @@ travis-ci = { repository = "saschagrunert/mowl", branch = "master" }
 appveyor = { repository = "saschagrunert/mowl", branch = "master", service = "github" }
 
 [dependencies]
+error-chain = "0"
 log = "0"
 term = "0"
