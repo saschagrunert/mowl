@@ -39,7 +39,29 @@ use term::color::*;
 pub fn init_with_level(log_level: LogLevel) -> Result<()> {
     log::set_logger(|max_log_level| {
         max_log_level.set(log_level.to_log_level_filter());
-        Box::new(Logger { level: log_level })
+        Box::new(Logger { level: log_level, enable_colors: true })
+    })?;
+    Ok(())
+}
+
+/// Initializes the global logger with a specific `max_log_level` and
+/// without any coloring.
+///
+/// ```
+/// # #[macro_use] extern crate log;
+/// # extern crate mowl;
+/// #
+/// # fn main() {
+/// mowl::init_with_level_and_without_colors(log::LogLevel::Warn).unwrap();
+///
+/// warn!("A warning");
+/// info!("A info message");
+/// # }
+/// ```
+pub fn init_with_level_and_without_colors(log_level: LogLevel) -> Result<()> {
+    log::set_logger(|max_log_level| {
+        max_log_level.set(log_level.to_log_level_filter());
+        Box::new(Logger { level: log_level, enable_colors: false })
     })?;
     Ok(())
 }
@@ -63,6 +85,7 @@ pub fn init() -> Result<()> {
 /// The logging structure
 pub struct Logger {
     level: LogLevel,
+    enable_colors: bool,
 }
 
 impl Log for Logger {
@@ -83,18 +106,29 @@ impl Logger {
     fn log_result(&self, record: &LogRecord) -> Result<()> {
         // We have to create a new terminal on each log because Send is not fulfilled
         let mut t = stderr().ok_or_else(|| "Could not create terminal.")?;
-        t.fg(BRIGHT_BLUE)?;
+        if self.enable_colors {
+            t.fg(BRIGHT_BLUE)?;
+        }
         write!(t, "[{}] ", record.location().module_path())?;
-        match record.level() {
-            LogLevel::Error => t.fg(BRIGHT_RED)?,
-            LogLevel::Warn => t.fg(BRIGHT_YELLOW)?,
-            LogLevel::Info => t.fg(BRIGHT_GREEN)?,
-            LogLevel::Debug => t.fg(BRIGHT_CYAN)?,
-            LogLevel::Trace => t.fg(BRIGHT_WHITE)?,
-        };
+        if self.enable_colors {
+            match record.level() {
+                LogLevel::Error => t.fg(BRIGHT_RED)?,
+                LogLevel::Warn => t.fg(BRIGHT_YELLOW)?,
+                LogLevel::Info => t.fg(BRIGHT_GREEN)?,
+                LogLevel::Debug => t.fg(BRIGHT_CYAN)?,
+                LogLevel::Trace => t.fg(BRIGHT_WHITE)?,
+            };
+        }
         write!(t, "[{}] ", record.level())?;
-        t.reset()?;
+        if self.enable_colors {
+            t.reset()?;
+        }
         writeln!(t, "{}", record.args())?;
         Ok(())
+    }
+
+    /// Disable coloring output
+    pub fn disable_colors(&mut self) {
+        self.enable_colors = false;
     }
 }
