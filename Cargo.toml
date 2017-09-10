@@ -1,1 +1,22 @@
+[package]
+name = "mowl"
 version = "1.2.0"
+authors = ["Sascha Grunert <mail@saschagrunert.de>"]
+readme = "README.md"
+keywords = ["logger", "color", "log", "logging"]
+repository = "https://github.com/saschagrunert/mowl"
+homepage = "https://github.com/saschagrunert/mowl"
+documentation = "https://docs.rs/mowl"
+description = "Simple logging with coloring support"
+categories = ["command-line-interface"]
+license-file = "LICENSE"
+
+[badges]
+travis-ci = { repository = "saschagrunert/mowl", branch = "master" }
+appveyor = { repository = "saschagrunert/mowl", branch = "master", service = "github" }
+
+[dependencies]
+error-chain = "0"
+log = "0"
+term = "0"
+time = "0"
