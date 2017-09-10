@@ -12,6 +12,7 @@
 #![deny(missing_docs)]
 extern crate log;
 extern crate term;
+extern crate time;
 
 #[macro_use]
 extern crate error_chain;
@@ -22,6 +23,7 @@ use error::*;
 use log::{Log, LogRecord, LogLevel, LogMetadata};
 use term::stderr;
 use term::color::*;
+use time::now;
 
 /// Initializes the global logger with a specific `max_log_level`.
 ///
@@ -106,6 +108,10 @@ impl Logger {
     fn log_result(&self, record: &LogRecord) -> Result<()> {
         // We have to create a new terminal on each log because Send is not fulfilled
         let mut t = stderr().ok_or_else(|| "Could not create terminal.")?;
+        if self.enable_colors {
+            t.fg(BRIGHT_BLACK)?;
+        }
+        write!(t, "[{}] ", now().rfc3339())?;
         if self.enable_colors {
             t.fg(BRIGHT_BLUE)?;
         }
