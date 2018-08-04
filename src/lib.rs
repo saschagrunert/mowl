@@ -10,19 +10,15 @@
 //! # }
 //! ```
 #![deny(missing_docs)]
+#[macro_use]
+extern crate failure;
 extern crate log;
 extern crate term;
 extern crate time;
 
-#[macro_use]
-extern crate error_chain;
-
-pub mod error;
-use error::*;
-
-use log::{Log, LogRecord, LogLevel, LogMetadata};
-use term::stderr;
-use term::color::*;
+use failure::Error;
+use log::{Level, LevelFilter, Log, Metadata, Record};
+use term::{color::*, stderr};
 use time::now;
 
 /// Initializes the global logger with a specific `max_log_level`.
@@ -32,17 +28,17 @@ use time::now;
 /// # extern crate mowl;
 /// #
 /// # fn main() {
-/// mowl::init_with_level(log::LogLevel::Warn).unwrap();
+/// mowl::init_with_level(log::LevelFilter::Warn).unwrap();
 ///
 /// warn!("A warning");
 /// info!("A info message");
 /// # }
 /// ```
-pub fn init_with_level(log_level: LogLevel) -> Result<()> {
-    log::set_logger(|max_log_level| {
-        max_log_level.set(log_level.to_log_level_filter());
-        Box::new(Logger { level: log_level, enable_colors: true })
-    })?;
+pub fn init_with_level(log_level: LevelFilter) -> Result<(), Error> {
+    log::set_boxed_logger(Box::new(Logger {
+        level: log_level,
+        enable_colors: true,
+    })).map(|()| log::set_max_level(log_level))?;
     Ok(())
 }
 
@@ -54,21 +50,22 @@ pub fn init_with_level(log_level: LogLevel) -> Result<()> {
 /// # extern crate mowl;
 /// #
 /// # fn main() {
-/// mowl::init_with_level_and_without_colors(log::LogLevel::Warn).unwrap();
+/// mowl::init_with_level_and_without_colors(log::LevelFilter::Warn).unwrap();
 ///
 /// warn!("A warning");
 /// info!("A info message");
 /// # }
 /// ```
-pub fn init_with_level_and_without_colors(log_level: LogLevel) -> Result<()> {
-    log::set_logger(|max_log_level| {
-        max_log_level.set(log_level.to_log_level_filter());
-        Box::new(Logger { level: log_level, enable_colors: false })
-    })?;
+pub fn init_with_level_and_without_colors(log_level: LevelFilter) -> Result<(), Error> {
+    log::set_boxed_logger(Box::new(Logger {
+        level: log_level,
+        enable_colors: false,
+    })).map(|()| log::set_max_level(log_level))?;
     Ok(())
 }
 
-/// Initializes the global logger with `max_log_level` set to `LogLevel::Trace`.
+/// Initializes the global logger with `max_log_level` set to
+/// `LevelFilter::Trace`.
 ///
 /// # Examples
 /// ```
@@ -80,34 +77,36 @@ pub fn init_with_level_and_without_colors(log_level: LogLevel) -> Result<()> {
 /// warn!("Warning");
 /// # }
 /// ```
-pub fn init() -> Result<()> {
-    init_with_level(LogLevel::Trace)
+pub fn init() -> Result<(), Error> {
+    init_with_level(LevelFilter::Trace)
 }
 
 /// The logging structure
 pub struct Logger {
-    level: LogLevel,
+    level: LevelFilter,
     enable_colors: bool,
 }
 
 impl Log for Logger {
-    fn enabled(&self, metadata: &LogMetadata) -> bool {
+    fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= self.level
     }
 
-    fn log(&self, record: &LogRecord) {
+    fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
             if let Err(e) = self.log_result(record) {
                 println!("Logging failed: {}", e);
             }
         }
     }
+
+    fn flush(&self) {}
 }
 
 impl Logger {
-    fn log_result(&self, record: &LogRecord) -> Result<()> {
+    fn log_result(&self, record: &Record) -> Result<(), Error> {
         // We have to create a new terminal on each log because Send is not fulfilled
-        let mut t = stderr().ok_or_else(|| "Could not create terminal.")?;
+        let mut t = stderr().ok_or_else(|| format_err!("Could not create terminal."))?;
         if self.enable_colors {
             t.fg(BRIGHT_BLACK)?;
         }
@@ -115,14 +114,14 @@ impl Logger {
         if self.enable_colors {
             t.fg(BRIGHT_BLUE)?;
         }
-        write!(t, "[{}] ", record.location().module_path())?;
+        write!(t, "[{}] ", record.module_path().unwrap_or("?"));
         if self.enable_colors {
             match record.level() {
-                LogLevel::Error => t.fg(BRIGHT_RED)?,
-                LogLevel::Warn => t.fg(BRIGHT_YELLOW)?,
-                LogLevel::Info => t.fg(BRIGHT_GREEN)?,
-                LogLevel::Debug => t.fg(BRIGHT_CYAN)?,
-                LogLevel::Trace => t.fg(BRIGHT_WHITE)?,
+                Level::Error => t.fg(BRIGHT_RED)?,
+                Level::Warn => t.fg(BRIGHT_YELLOW)?,
+                Level::Info => t.fg(BRIGHT_GREEN)?,
+                Level::Debug => t.fg(BRIGHT_CYAN)?,
+                Level::Trace => t.fg(BRIGHT_WHITE)?,
             };
         }
         write!(t, "[{}] ", record.level())?;
