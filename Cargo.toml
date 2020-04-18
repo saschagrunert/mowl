@@ -16,7 +16,7 @@ travis-ci = { repository = "saschagrunert/mowl", branch = "master" }
 appveyor = { repository = "saschagrunert/mowl", branch = "master", service = "github" }
 
 [dependencies]
-failure = "0.1.2"
-log = { version="0.4.3", features=["std"] }
-term = "0.5.1"
-time = "0.1.40"
+failure = "0.1.7"
+log = { version="0.4.8", features=["std"] }
+term = "0.6.1"
+time = "0.1.41"
