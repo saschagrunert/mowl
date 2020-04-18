@@ -33,7 +33,11 @@ use std::io::prelude::*;
 /// warn!("A warning");
 /// info!("A info message");
 /// # }
-/// ```
+///```
+///
+/// # Errors
+///
+/// An error is returned if a logger has already been set.
 pub fn init_with_level(log_level: LevelFilter) -> Result<(), Error> {
     log::set_boxed_logger(Box::new(Logger {
         level: log_level,
@@ -56,6 +60,10 @@ pub fn init_with_level(log_level: LevelFilter) -> Result<(), Error> {
 /// info!("A info message");
 /// # }
 /// ```
+///
+/// # Errors
+///
+/// An error is returned if a logger has already been set.
 pub fn init_with_level_and_without_colors(log_level: LevelFilter) -> Result<(), Error> {
     log::set_boxed_logger(Box::new(Logger {
         level: log_level,
@@ -77,6 +85,10 @@ pub fn init_with_level_and_without_colors(log_level: LevelFilter) -> Result<(), 
 /// warn!("Warning");
 /// # }
 /// ```
+///
+/// # Errors
+///
+/// An error is returned if logger has already been initialized.
 pub fn init() -> Result<(), Error> {
     init_with_level(LevelFilter::Trace)
 }
@@ -170,7 +182,7 @@ impl LogSink {
     }
 }
 
-/// Implement Write for LogSink by forwarding to the underlying Writers
+/// Implement Write for `LogSink` by forwarding to the underlying Writers
 impl std::io::Write for LogSink {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         match self {
