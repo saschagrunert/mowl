@@ -17,9 +17,9 @@ extern crate time;
 
 use failure::Error;
 use log::{Level, LevelFilter, Log, Metadata, Record};
+use std::io::prelude::*;
 use term::{color::*, StderrTerminal};
 use time::now;
-use std::io::prelude::*;
 
 /// Initializes the global logger with a specific `max_log_level`.
 ///
@@ -42,7 +42,8 @@ pub fn init_with_level(log_level: LevelFilter) -> Result<(), Error> {
     log::set_boxed_logger(Box::new(Logger {
         level: log_level,
         enable_colors: true,
-    })).map(|()| log::set_max_level(log_level))?;
+    }))
+    .map(|()| log::set_max_level(log_level))?;
     Ok(())
 }
 
@@ -68,7 +69,8 @@ pub fn init_with_level_and_without_colors(log_level: LevelFilter) -> Result<(), 
     log::set_boxed_logger(Box::new(Logger {
         level: log_level,
         enable_colors: false,
-    })).map(|()| log::set_max_level(log_level))?;
+    }))
+    .map(|()| log::set_max_level(log_level))?;
     Ok(())
 }
 
@@ -161,9 +163,9 @@ enum LogSink {
 impl LogSink {
     fn new() -> Self {
         if let Some(term) = term::stderr() {
-             Self::Terminal(term)
+            Self::Terminal(term)
         } else {
-             Self::Fallback(std::io::stderr())
+            Self::Fallback(std::io::stderr())
         }
     }
 
