@@ -1,6 +1,6 @@
 [package]
 name = "mowl"
-version = "2.0.0"
+version = "2.1.0"
 authors = ["Sascha Grunert <mail@saschagrunert.de>"]
 readme = "README.md"
 keywords = ["logger", "color", "log", "logging"]
