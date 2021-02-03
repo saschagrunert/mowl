@@ -19,7 +19,7 @@ use failure::Error;
 use log::{Level, LevelFilter, Log, Metadata, Record};
 use std::io::prelude::*;
 use term::{color::*, StderrTerminal};
-use time::now;
+use time::{Format, OffsetDateTime};
 
 /// Initializes the global logger with a specific `max_log_level`.
 ///
@@ -124,7 +124,11 @@ impl Logger {
         if self.enable_colors {
             t.fg(BRIGHT_BLACK)?;
         }
-        write!(t, "[{}] ", now().rfc3339())?;
+        write!(
+            t,
+            "[{}] ",
+            OffsetDateTime::now_utc().lazy_format(Format::Rfc3339)
+        )?;
         if self.enable_colors {
             t.fg(BRIGHT_BLUE)?;
         }
